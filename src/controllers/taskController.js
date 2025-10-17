@@ -1,19 +1,24 @@
-const JsonRepository = require("../repository/JsonRepository");
+const provider = (process.env.DB_PROVIDER || "").toLowerCase();
+
 let repo;
-if (process.env.MONGODB_URI) {
+if (provider === "mongo") {
   const MongoRepository = require("../repository/MongoRepository");
   repo = new MongoRepository();
+} else if (provider === "postgres") {
+  const PostgresRepository = require("../repository/PostgresRepository");
+  repo = new PostgresRepository();
 } else {
-  repo = new JsonRepository();
+  throw new Error("DB_PROVIDER doit être 'mongo' ou 'postgres'.");
 }
+
 exports.list = async (req, res, next) => {
   try {
-    const tasks = await repo.all();
-    res.json(tasks);
+    res.json(await repo.all());
   } catch (e) {
     next(e);
   }
 };
+
 exports.create = async (req, res, next) => {
   try {
     const {
@@ -23,21 +28,13 @@ exports.create = async (req, res, next) => {
       dueDate = null,
     } = req.body || {};
     if (!title) return res.status(400).json({ error: "Missing field: title" });
-    const payload = { title, description, priority };
-    if (dueDate) payload.dueDate = dueDate;
-    if (process.env.MONGODB_URI) {
-      const task = await repo.create(payload);
-      return res.status(201).json(task);
-    } else {
-      const TaskLocal = require("../models/Task");
-      const t = new TaskLocal(payload);
-      await repo.save(t);
-      return res.status(201).json(t.toJSON());
-    }
+    const item = await repo.create({ title, description, priority, dueDate });
+    res.status(201).json(item);
   } catch (e) {
     next(e);
   }
 };
+
 exports.remove = async (req, res, next) => {
   try {
     const ok = await repo.delete(req.params.id);
@@ -47,20 +44,12 @@ exports.remove = async (req, res, next) => {
     next(e);
   }
 };
+
 exports.done = async (req, res, next) => {
   try {
-    if (process.env.MONGODB_URI) {
-      const item = await repo.markDone(req.params.id);
-      if (!item) return res.status(404).json({ error: "Task not found" });
-      return res.json(item);
-    } else {
-      const r = new JsonRepository();
-      const t = r.get(req.params.id);
-      if (!t) return res.status(404).json({ error: "Task not found" });
-      t.markDone();
-      await r.save(t);
-      return res.json(t.toJSON());
-    }
+    const item = await repo.markDone(req.params.id);
+    if (!item) return res.status(404).json({ error: "Task not found" });
+    res.json(item);
   } catch (e) {
     next(e);
   }

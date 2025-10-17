@@ -6,15 +6,19 @@
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "dev:pg": "cross-env DB_PROVIDER=postgres nodemon server.js",
+    "dev:mongo": "cross-env DB_PROVIDER=mongo nodemon server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "mongoose": "^8.19.1"
+    "mongoose": "^8.19.1",
+    "pg": "^8.16.3"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "nodemon": "^3.1.0"
   }
 }

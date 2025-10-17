@@ -1,30 +1,38 @@
 # Exercice2 — API ToDoList Express (MVC)
 
-Création d'une API **ToDoList** en **JavaScript** avec **Express** (architecture **MVC**).
+Création d'une API **ToDoList** en **JavaScript** avec **Express** et architecture **MVC**.  
+Cette API supporte plusieurs bases de données : **MongoDB** ou **PostgreSQL**, au choix au moment du lancement.
 
-## Installation et configuration de l’environnement
+---
+
+## 🚀 Installation et configuration de l’environnement
+
 ```bash
 cd Exercice2-Todo-Express
 npm install
-# ou depuis zéro, comme demandé
+# ou depuis zéro
 npm init -y
-npm install express cors dotenv
-npm install --save-dev nodemon
-```
+npm install express cors dotenv mongoose pg
+npm install --save-dev nodemon cross-env
 
 ## Scripts (package.json)
 ```json
 {
-  "start": "node server.js",
-  "dev": "nodemon server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "dev:mongo": "cross-env DB_PROVIDER=mongo nodemon server.js",
+    "dev:pg": "cross-env DB_PROVIDER=postgres nodemon server.js"
 }
 ```
 
 ## Lancer le serveur
 ```bash
-npm run dev   # dev avec nodemon
-# ou
-npm start     # prod simple
+# PostgreSQL
+npm run dev:pg
+
+# MongoDB
+npm run dev:mongo
+
 ```
 
 ## Endpoints
@@ -51,12 +59,16 @@ Exercice2-Todo-Express/
 └── src/
     ├── controllers/
     │   └── taskController.js
+    ├── db.js
+    ├── db_pg.js
     ├── models/
-    │   └── Task.js
+    │   └── TaskMongo.js
     ├── repository/
-    │   └── JsonRepository.js
+    │   ├── MongoRepository.js
+    │   └── PostgresRepository.js
     └── routes/
         └── taskRoutes.js
+
 ```
 
 ## Persistance
