@@ -11,45 +11,38 @@ if (provider === "mongo") {
   throw new Error("DB_PROVIDER doit être 'mongo' ou 'postgres'.");
 }
 
+// Liste toutes les tâches
 exports.list = async (req, res, next) => {
   try {
-    res.json(await repo.all());
+    const tasks = await repo.all();
+    res.json(tasks);
   } catch (e) {
     next(e);
   }
 };
 
+// Crée une nouvelle tâche
 exports.create = async (req, res, next) => {
   try {
-    const {
-      title,
-      description = "",
-      priority = "medium",
-      dueDate = null,
-    } = req.body || {};
-    if (!title) return res.status(400).json({ error: "Missing field: title" });
-    const item = await repo.create({ title, description, priority, dueDate });
+    const { title } = req.body || {};
+    if (!title) {
+      return res.status(400).json({ error: "Le champ 'title' est requis." });
+    }
+    const item = await repo.create({ title });
     res.status(201).json(item);
   } catch (e) {
     next(e);
   }
 };
 
+// Supprime une tâche
 exports.remove = async (req, res, next) => {
   try {
     const ok = await repo.delete(req.params.id);
-    if (!ok) return res.status(404).json({ error: "Task not found" });
-    res.json({ message: "Task deleted" });
-  } catch (e) {
-    next(e);
-  }
-};
-
-exports.done = async (req, res, next) => {
-  try {
-    const item = await repo.markDone(req.params.id);
-    if (!item) return res.status(404).json({ error: "Task not found" });
-    res.json(item);
+    if (!ok) {
+      return res.status(404).json({ error: "Tâche non trouvée." });
+    }
+    res.json({ message: "Tâche supprimée." });
   } catch (e) {
     next(e);
   }
