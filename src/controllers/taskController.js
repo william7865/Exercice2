@@ -47,3 +47,21 @@ exports.remove = async (req, res, next) => {
     next(e);
   }
 };
+
+exports.done = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    if (typeof repo.update !== "function") {
+      return res
+        .status(501)
+        .json({ error: "Fonction 'done' non implémentée dans le repository." });
+    }
+    const updated = await repo.update(id, { done: true });
+    if (!updated) {
+      return res.status(404).json({ error: "Tâche non trouvée." });
+    }
+    res.json(updated);
+  } catch (e) {
+    next(e);
+  }
+};

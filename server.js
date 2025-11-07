@@ -1,18 +1,24 @@
 require("dotenv").config();
 
 const express = require("express");
+const swaggerUi = require("swagger-ui-express");
 const cors = require("cors");
 const taskRoutes = require("./src/routes/taskRoutes");
 const { connectDB } = require("./src/db"); // Mongo (if chosen)
 const { connectPG } = require("./src/db_pg"); // Postgres (if chosen)
 
+const swaggerDocument = require("./src/swagger.json");
+
+const app = express();
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 const provider = (process.env.DB_PROVIDER || "").toLowerCase();
 if (!["mongo", "postgres"].includes(provider)) {
-  console.error("❌ DB_PROVIDER doit être 'mongo' ou 'postgres'.");
+  console.error("DB_PROVIDER doit être 'mongo' ou 'postgres'.");
   process.exit(1);
 }
 
-const app = express();
 app.use(cors());
 app.use(express.json());
 
