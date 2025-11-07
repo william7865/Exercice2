@@ -4,8 +4,9 @@ const express = require("express");
 const swaggerUi = require("swagger-ui-express");
 const cors = require("cors");
 const taskRoutes = require("./src/routes/taskRoutes");
-const { connectDB } = require("./src/db"); // Mongo (if chosen)
-const { connectPG } = require("./src/db_pg"); // Postgres (if chosen)
+const authRoutes = require("./src/routes/authRoutes");
+const { connectDB } = require("./src/db"); // Mongo
+const { connectPG } = require("./src/db_pg"); // Postgres
 
 const swaggerDocument = require("./src/swagger.json");
 
@@ -22,6 +23,10 @@ if (!["mongo", "postgres"].includes(provider)) {
 app.use(cors());
 app.use(express.json());
 
+// Routes API
+app.use("/auth", authRoutes);
+app.use("/tasks", taskRoutes);
+
 app.get("/", (req, res) => {
   res.json({
     name: "ToDoList API (Express)",
@@ -31,13 +36,11 @@ app.get("/", (req, res) => {
       "GET /tasks": "Lister les tâches",
       "POST /tasks": "Créer une tâche",
       "DELETE /tasks/:id": "Supprimer une tâche",
-      "PATCH /tasks/:id/done": "Marquer terminée",
     },
   });
 });
 
-app.use("/tasks", taskRoutes);
-
+// Gestion des erreurs
 app.use((req, res) => res.status(404).json({ error: "Not found" }));
 app.use((err, req, res, _next) => {
   console.error(err);
